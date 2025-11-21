@@ -1,0 +1,60 @@
+name: Database Migration Check
+
+on:
+  push:
+    branches: [ main, master, develop ]
+    paths:
+      - 'migrations/**'
+  pull_request:
+    branches: [ main, master, develop ]
+    paths:
+      - 'migrations/**'
+
+jobs:
+  check-migrations:
+    name: Check Migrations
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: pr_reviewer_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run migrations up
+        uses: docker://migrate/migrate:latest
+        with:
+          args: >
+            -path=./migrations
+            -database=postgres://postgres:postgres@localhost:5432/pr_reviewer_test?sslmode=disable
+            up
+
+      - name: Run migrations down
+        uses: docker://migrate/migrate:latest
+        with:
+          args: >
+            -path=./migrations
+            -database=postgres://postgres:postgres@localhost:5432/pr_reviewer_test?sslmode=disable
+            down
+            -all
+
+      - name: Run migrations up again
+        uses: docker://migrate/migrate:latest
+        with:
+          args: >
+            -path=./migrations
+            -database=postgres://postgres:postgres@localhost:5432/pr_reviewer_test?sslmode=disable
+            up

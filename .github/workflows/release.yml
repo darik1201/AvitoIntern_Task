@@ -1,0 +1,53 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g., v1.0.0)'
+        required: true
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+
+      - name: Build binary
+        run: |
+          GOOS=linux GOARCH=amd64 go build -o bin/server-linux-amd64 ./cmd/server
+          GOOS=darwin GOARCH=amd64 go build -o bin/server-darwin-amd64 ./cmd/server
+          GOOS=darwin GOARCH=arm64 go build -o bin/server-darwin-arm64 ./cmd/server
+          GOOS=windows GOARCH=amd64 go build -o bin/server-windows-amd64.exe ./cmd/server
+
+      - name: Create release archive
+        run: |
+          tar -czf server-linux-amd64.tar.gz -C bin server-linux-amd64
+          tar -czf server-darwin-amd64.tar.gz -C bin server-darwin-amd64
+          tar -czf server-darwin-arm64.tar.gz -C bin server-darwin-arm64
+          zip server-windows-amd64.zip bin/server-windows-amd64.exe
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            *.tar.gz
+            *.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
