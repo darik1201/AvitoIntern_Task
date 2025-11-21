@@ -57,7 +57,7 @@ jobs:
           DB_PASSWORD: postgres
           DB_NAME: pr_reviewer_test
           DB_SSLMODE: disable
-        run: go test -v -race -coverprofile=coverage.out ./...
+        run: go test -v -race -coverprofile=coverage.out -coverpkg=./internal/... ./internal/test
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
