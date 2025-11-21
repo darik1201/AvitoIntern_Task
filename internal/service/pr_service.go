@@ -142,8 +142,8 @@ func (s *PRService) ReassignReviewer(prID, oldReviewerID string) (string, *model
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	newReviewer := available[r.Intn(len(available))]
 
-	if err := s.prRepo.ReassignReviewer(prID, oldReviewerID, newReviewer.UserID); err != nil {
-		return "", nil, fmt.Errorf("failed to reassign reviewer: %w", err)
+	if reassignErr := s.prRepo.ReassignReviewer(prID, oldReviewerID, newReviewer.UserID); reassignErr != nil {
+		return "", nil, fmt.Errorf("failed to reassign reviewer: %w", reassignErr)
 	}
 
 	updatedPR, err := s.prRepo.GetPR(prID)

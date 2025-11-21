@@ -60,14 +60,14 @@ func (r *TeamRepository) GetTeam(teamName string) (*models.Team, error) {
 
 	for rows.Next() {
 		var member models.TeamMember
-		if err := rows.Scan(&member.UserID, &member.Username, &member.IsActive); err != nil {
-			return nil, fmt.Errorf("failed to scan member: %w", err)
+		if scanErr := rows.Scan(&member.UserID, &member.Username, &member.IsActive); scanErr != nil {
+			return nil, fmt.Errorf("failed to scan member: %w", scanErr)
 		}
 		team.Members = append(team.Members, member)
 	}
 
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("error iterating members: %w", err)
+	if rowsErr := rows.Err(); rowsErr != nil {
+		return nil, fmt.Errorf("error iterating members: %w", rowsErr)
 	}
 
 	var exists bool
