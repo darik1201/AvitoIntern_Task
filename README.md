@@ -1,7 +1,7 @@
 # PR Reviewer Assignment Service
 
 Микросервис для автоматического назначения ревьюеров на Pull Request'ы с управлением командами и участниками.
-
+[![CI](https://github.com/darik1201/AvitoIntern_Task/actions/workflows/ci.yml/badge.svg)](https://github.com/darik1201/AvitoIntern_Task/actions)
 ## Быстрый старт
 
 ```bash
