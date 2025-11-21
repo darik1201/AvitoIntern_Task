@@ -39,6 +39,16 @@ jobs:
       - name: Download dependencies
         run: go mod download
 
+      - name: Run migrations
+        run: |
+          docker run --rm \
+            --network host \
+            -v ${{ github.workspace }}/migrations:/migrations \
+            migrate/migrate:latest \
+            -path=/migrations \
+            -database=postgres://postgres:postgres@localhost:5432/pr_reviewer_test?sslmode=disable \
+            up
+
       - name: Run tests
         env:
           DB_HOST: localhost

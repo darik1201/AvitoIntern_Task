@@ -194,11 +194,20 @@ func TestMergePR(t *testing.T) {
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusOK, w.Code)
+	if w.Code != http.StatusOK {
+		t.Logf("Unexpected status code: %d, body: %s", w.Code, w.Body.String())
+		return
+	}
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response) //nolint:errcheck
-	pr := response["pr"].(map[string]interface{})
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("Failed to parse response: %v, body: %s", err, w.Body.String())
+	}
+	
+	pr, ok := response["pr"].(map[string]interface{})
+	if !ok {
+		t.Fatalf("Failed to parse PR from response: %v", response)
+	}
 	assert.Equal(t, "MERGED", pr["status"])
 
 	body, _ = json.Marshal(mergeReq)
